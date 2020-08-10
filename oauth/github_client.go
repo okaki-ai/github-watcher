@@ -13,6 +13,15 @@ type GithubAuth struct {
 	Client      *github.Client
 }
 
+var sharedAuthInstance *GithubAuth
+
+func GetAuthInstance() *GithubAuth {
+	if sharedAuthInstance == nil {
+		sharedAuthInstance = &GithubAuth{}
+	}
+	return sharedAuthInstance
+}
+
 func (g *GithubAuth) NewGithubClient(access_token string) (*GithubAuth, error) {
 	g.AccessToken = access_token
 	ctx := context.Background()

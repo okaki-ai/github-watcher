@@ -19,7 +19,7 @@ type Repositories struct {
 	client          *github.Client
 }
 
-type TrendingResult []struct {
+type TrendingResult struct {
 	Author             string `json:"author"`
 	Name               string `json:"name"`
 	Avatar             string `json:"avatar"`
@@ -35,6 +35,16 @@ type TrendingResult []struct {
 		Avatar   string `json:"avatar"`
 		Username string `json:"username"`
 	} `json:"builtBy"`
+	TrendingResults []TrendingResult
+}
+
+var sharedRepositoriesInstance *Repositories
+
+func GetRepositriesInstance() *Repositories {
+	if sharedRepositoriesInstance == nil {
+		sharedRepositoriesInstance = &Repositories{}
+	}
+	return sharedRepositoriesInstance
 }
 
 // Search All Repository
@@ -52,9 +62,30 @@ func (r *Repositories) SearchAllRepository(a Repositories) (*github.Repositories
 	return res, nil
 }
 
+type TrendingRepositories struct {
+	language        string
+	since           string
+	spoken_language string
+}
+
+var sharedTrendingRepositoriesInstance *TrendingRepositories
+
+func GetTrendingRepositriesInstance() *TrendingRepositories {
+	if sharedTrendingRepositoriesInstance == nil {
+		sharedTrendingRepositoriesInstance = &TrendingRepositories{}
+	}
+	return sharedTrendingRepositoriesInstance
+}
+func (t *TrendingRepositories) SetParmsTrendingRepository(language string, since string, spoken_language string) *TrendingRepositories {
+	t.language = language
+	t.since = since
+	t.spoken_language = spoken_language
+	return t
+}
+
 // Search Trending Repository
-func (r *Repositories) SearchTrendingRepository(a Repositories) (*TrendingResult, error) {
-	request_url := "https://ghapi.huchen.dev/repositories?" + "language=" + a.language + "&since=" + a.since + "&spoken_language_code=" + a.spoken_language
+func (t *TrendingRepositories) SearchTrendingRepository() (*TrendingResult, error) {
+	request_url := "https://ghapi.huchen.dev/repositories?" + "language=" + t.language + "&since=" + t.since + "&spoken_language_code=" + t.spoken_language
 	resp, _ := http.Get(request_url)
 	defer resp.Body.Close()
 	if resp.StatusCode >= 400 {
@@ -62,7 +93,7 @@ func (r *Repositories) SearchTrendingRepository(a Repositories) (*TrendingResult
 	}
 	byteArray, _ := ioutil.ReadAll(resp.Body)
 	data := new(TrendingResult)
-	if err := json.Unmarshal(byteArray, data); err != nil {
+	if err := json.Unmarshal(byteArray, data.TrendingResults); err != nil {
 		return nil, err
 	}
 	return data, nil

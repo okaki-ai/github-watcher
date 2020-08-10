@@ -23,6 +23,14 @@ type CompanyCommits struct {
 	total_commits int
 }
 
+var sharedContributorsInstance *Contributors
+
+func GetContributorsInstance() *Contributors {
+	if sharedContributorsInstance == nil {
+		sharedContributorsInstance = &Contributors{}
+	}
+	return sharedContributorsInstance
+}
 func (c *Contributors) ListContributorsForRepo(owner string, repository string) (*Contributors, error) {
 	ctx := context.Background()
 	contributors, _, err := c.Client.Repositories.ListContributorsStats(ctx, owner, repository)
@@ -33,18 +41,6 @@ func (c *Contributors) ListContributorsForRepo(owner string, repository string) 
 		Contributors: contributors,
 	}
 	return b, nil
-}
-
-func (c *Contributors) GetCompanyOfUserFromList() ([]User, error) {
-	var users []User
-	for i, v := range c.Contributors {
-		user := *(v.Author.Login)
-		users[i].user_name = *(v.Author.Login)
-		company, _ := c.GetCompanyOfUser(user)
-		users[i].company = *company
-		users[i].total_commits = v.GetTotal()
-	}
-	return users, nil
 }
 
 func (c *Contributors) SummaryForEachCompany(users []User) []CompanyCommits {
@@ -72,6 +68,19 @@ func (c *Contributors) AddComitsForEachCompany(targets []CompanyCommits, user Us
 		targets = append(targets, n)
 	}
 	return targets
+}
+
+// based on contributors struct make []User struct
+func (c *Contributors) GetCompanyOfUserFromList() ([]User, error) {
+	var users []User
+	for i, v := range c.Contributors {
+		user := *(v.Author.Login)
+		users[i].user_name = *(v.Author.Login)
+		company, _ := c.GetCompanyOfUser(user)
+		users[i].company = *company
+		users[i].total_commits = v.GetTotal()
+	}
+	return users, nil
 }
 
 func (c *Contributors) GetCompanyOfUser(user string) (*string, error) {
