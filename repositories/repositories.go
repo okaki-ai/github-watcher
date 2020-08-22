@@ -84,7 +84,7 @@ func (t *TrendingRepositories) SetParmsTrendingRepository(language string, since
 }
 
 // Search Trending Repository
-func (t *TrendingRepositories) SearchTrendingRepository() (*TrendingResult, error) {
+func (t *TrendingRepositories) SearchTrendingRepository() ([]TrendingResult, error) {
 	request_url := "https://ghapi.huchen.dev/repositories?" + "language=" + t.language + "&since=" + t.since + "&spoken_language_code=" + t.spoken_language
 	resp, _ := http.Get(request_url)
 	defer resp.Body.Close()
@@ -93,8 +93,8 @@ func (t *TrendingRepositories) SearchTrendingRepository() (*TrendingResult, erro
 	}
 	byteArray, _ := ioutil.ReadAll(resp.Body)
 	data := new(TrendingResult)
-	if err := json.Unmarshal(byteArray, data.TrendingResults); err != nil {
+	if err := json.Unmarshal(byteArray, &data.TrendingResults); err != nil {
 		return nil, err
 	}
-	return data, nil
+	return data.TrendingResults, nil
 }

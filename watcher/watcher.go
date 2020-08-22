@@ -26,22 +26,17 @@ func GetTrendingRepoController() error {
 	}
 	var Repos []csv.Repo
 	var Companies []csv.Company
-	for k, v := range res.TrendingResults {
-		Repos[k].Id = k
-		Repos[k].Repository = res.Name
-		Repos[k].Description = res.Description
-		Repos[k].Current_period_stars = res.CurrentPeriodStars
-		Repos[k].Stars = res.Stars
-		Repos[k].Url = res.URL
+	for k, v := range res {
+		Repos = append(Repos, csv.Repo{k, v.Name, v.Description, v.URL, v.Stars, v.CurrentPeriodStars})
 		con := users.GetContributorsInstance()
-		contributors, _ := con.ListContributorsForRepo(v.Author, v.Name)
-		users, _ := contributors.GetCompanyOfUserFromList()
-		company_list := contributors.SummaryForEachCompany(users)
+		if err := con.ListContributorsForRepo(v.Author, v.Name); err != nil {
+			log.Fatalf("[watcher] failed to list contribotutors (error: %v)", err)
+		}
+		log.Printf("CCCCCCCCC")
+		users, _ := con.GetCompanyOfUserFromList()
+		company_list := con.SummaryForEachCompany(users)
 		for _, c := range company_list {
-			Companies[k].Id = k
-			Companies[k].Repository = res.Name
-			Companies[k].Company = c.Company
-			Companies[k].Commits = c.TotalCommits
+			Companies = append(Companies, csv.Company{k, v.Name, c.Company, c.TotalCommits})
 		}
 	}
 	csv.WriteReposToCSV(repo_csv, Repos)

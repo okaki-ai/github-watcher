@@ -10,7 +10,6 @@ import (
 type Repo struct {
 	Id                   int    `csv:"ID"`
 	Repository           string `csv:"Repository"`
-	Tag                  string `csv:"Tag"`
 	Description          string `csv:"Description"`
 	Url                  string `csv:"URL"`
 	Stars                int    `csv:"Stars"`
