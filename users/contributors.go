@@ -1,4 +1,4 @@
-package contributors
+package users
 
 import (
 	"context"
@@ -13,14 +13,14 @@ type Contributors struct {
 }
 
 type User struct {
-	user_name     string
-	company       string
-	total_commits int
+	Name         string
+	Company      string
+	TotalCommits int
 }
 
 type CompanyCommits struct {
-	company       string
-	total_commits int
+	Company      string
+	TotalCommits int
 }
 
 var sharedContributorsInstance *Contributors
@@ -54,16 +54,16 @@ func (c *Contributors) SummaryForEachCompany(users []User) []CompanyCommits {
 func (c *Contributors) AddComitsForEachCompany(targets []CompanyCommits, user User) []CompanyCommits {
 	var exist = false
 	for _, t := range targets {
-		if t.company == user.company {
-			t.total_commits = t.total_commits + user.total_commits
+		if t.Company == user.Company {
+			t.TotalCommits = t.TotalCommits + user.TotalCommits
 			exist = true
 			break
 		}
 	}
 	if exist == false {
 		n := CompanyCommits{
-			company:       user.company,
-			total_commits: user.total_commits,
+			Company:      user.Company,
+			TotalCommits: user.TotalCommits,
 		}
 		targets = append(targets, n)
 	}
@@ -75,10 +75,10 @@ func (c *Contributors) GetCompanyOfUserFromList() ([]User, error) {
 	var users []User
 	for i, v := range c.Contributors {
 		user := *(v.Author.Login)
-		users[i].user_name = *(v.Author.Login)
+		users[i].Name = *(v.Author.Login)
 		company, _ := c.GetCompanyOfUser(user)
-		users[i].company = *company
-		users[i].total_commits = v.GetTotal()
+		users[i].Company = *company
+		users[i].TotalCommits = v.GetTotal()
 	}
 	return users, nil
 }
